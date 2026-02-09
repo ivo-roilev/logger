@@ -33,12 +33,15 @@ We want a small, focused logging service that accepts log events over HTTP and i
   - `[<timestamp>] [<user>] [<app>] [<level>] <message>`, omitting any `[<user>]` or `[<app>]` segments when those fields are not present
   - If there are extra fields, append: ` | key=value key2=value2`
 - **Safe concurrent writes**: Ensure concurrent requests cannot interleave partial lines or corrupt the file.
-- **Configuration via environment**: Allow configuring the listen port and log file path via environment variables, with sensible defaults.
+- **Message-timestamp-based file organisation**: Automatically organise log entries into files based on the UTC date of each message's timestamp, with file names formatted as `YYYY-MM-DD.log` (e.g., `2026-02-09.log`). Messages from different dates are written to different files.
+- **Timestamp validation window**: Accept only log events whose UTC date is within a 3-day window: the current server date, the previous day, or the next day. Reject events outside this window.
+- **Configuration via environment**: Allow configuring the listen port and log file directory via environment variables, with sensible defaults.
 
 ## Non-goals
 
-- **Log rotation and retention**: Rotating files, enforcing retention policies, or compressing old logs are explicitly out of scope for this change.
-- **Advanced querying / analytics**: This service only appends to a file. Searching, indexing, or aggregating logs are out of scope.
+- **Log retention and cleanup**: Deleting old log files, enforcing retention policies, or compressing old logs are explicitly out of scope.
+- **Advanced querying / analytics**: This service only appends to files. Searching, indexing, or aggregating logs are out of scope.
+- **Automatic time-based rotation**: The service does not rotate files based on system time. File organisation is driven by the timestamp in each message.
 - **Authentication and authorisation**: For now, the endpoint is unauthenticated. Network-layer controls or auth can be introduced in a future change.
 - **Guaranteed durability beyond the OS**: We rely on the OS and filesystem for durability. We do not implement additional journaling, replication, or queueing.
 
@@ -55,19 +58,27 @@ We want a small, focused logging service that accepts log events over HTTP and i
 - Normalise and validate incoming requests:
   - Parse the JSON body into a Go struct.
   - Validate required fields and timestamp format where appropriate.
+  - Extract the UTC date from the timestamp and validate it is within the 3-day window (current date ± 1 day). Reject timestamps outside this window.
   - Allow extra top-level fields but ignore them for now.
 - Format each event into a single line using the bracketed format, replacing `\n` and `\r` in `message` with tabs to preserve the one-line-per-event property.
 - Implement a file sink that:
-  - Opens (or creates) the configured log file.
+  - Tracks the current server date (in UTC) and maintains an always-open file handle for today's log file only.
+  - When a new log event arrives, checks if the server date has changed since the last event. If it has:
+    - Closes the old file handle.
+    - Opens a new file handle for the new current date.
+  - For events with timestamps from the previous or next day, opens the file, writes the event, and immediately closes the file (no caching). These events are expected to be rare.
+  - Extracts the UTC date from each event's timestamp and routes it to the appropriate file.
   - Serialises writes (e.g., using a mutex) so each event is written as an atomic line with a trailing newline.
-  - Can be reused across HTTP requests without reopening the file each time.
+  - Minimises file handle overhead by keeping only today's file open continuously.
 - Expose configuration through environment variables:
   - `PORT` (default `8080`)
-  - `LOG_FILE_PATH` (default `./logs/app.log`)
+  - `LOG_DIR` (default `./logs`) - directory where daily log files will be stored
 
 ## Success criteria
 
-- When the service is running locally and a client sends a valid JSON payload to `POST /logs`, exactly one new line appears in the configured log file in the expected format.
-- Multiple concurrent clients can send log events without generating interleaved or corrupted log lines.
+- When the service is running locally and a client sends a valid JSON payload with timestamp within the 3-day window (e.g., today's date) to `POST /logs`, exactly one new line appears in the corresponding dated log file in the expected format.
+- When a client sends a request with a timestamp outside the 3-day window (e.g., 10 days in the future or past), the service rejects it with a `400 Bad Request` response.
+- When the server date changes (e.g., from 2026-02-09 to 2026-02-10), the current-day file handle is automatically closed and a new one is opened for the new day, maintaining file integrity.
+- Multiple concurrent clients can send log events without generating interleaved or corrupted log lines, even when writing to multiple date-based files.
 - The service is straightforward to run locally with a documented command and example `curl` usage.
 
