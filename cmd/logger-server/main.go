@@ -14,12 +14,12 @@ import (
 
 func main() {
 	addr := normalizeAddr(os.Getenv("PORT"))
-	logFilePath := os.Getenv("LOG_FILE_PATH")
-	if logFilePath == "" {
-		logFilePath = "./logs/app.log"
+	logDir := os.Getenv("LOG_DIR")
+	if logDir == "" {
+		logDir = "./logs"
 	}
 
-	fileSink, err := sink.NewFileSink(logFilePath)
+	fileSink, err := sink.NewFileSink(logDir)
 	if err != nil {
 		log.Fatalf("failed to initialise file sink: %v", err)
 	}
@@ -34,7 +34,7 @@ func main() {
 
 	r.Post("/logs", handler.PostLog)
 
-	log.Printf("logging service listening on %s, writing to %s", addr, logFilePath)
+	log.Printf("logging service listening on %s, writing to %s", addr, logDir)
 	if err := http.ListenAndServe(addr, r); err != nil {
 		log.Fatalf("server error: %v", err)
 	}

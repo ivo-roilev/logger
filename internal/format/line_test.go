@@ -26,6 +26,67 @@ func TestFormatEvent_NoFields(t *testing.T) {
 	}
 }
 
+func TestFormatEvent_WithApp(t *testing.T) {
+	ev := model.Event{
+		Timestamp: time.Date(2026, 2, 9, 12, 34, 56, 0, time.UTC),
+		Level:     model.LevelInfo,
+		Message:   "Something happened",
+		App:       "myservice",
+		Fields:    map[string]any{},
+	}
+
+	line, err := FormatEvent(ev)
+	if err != nil {
+		t.Fatalf("FormatEvent returned error: %v", err)
+	}
+
+	expected := "[2026-02-09T12:34:56Z] [myservice] [info] Something happened"
+	if line != expected {
+		t.Fatalf("expected %q, got %q", expected, line)
+	}
+}
+
+func TestFormatEvent_WithUser(t *testing.T) {
+	ev := model.Event{
+		Timestamp: time.Date(2026, 2, 9, 12, 34, 56, 0, time.UTC),
+		Level:     model.LevelInfo,
+		Message:   "Something happened",
+		User:      "alice",
+		Fields:    map[string]any{},
+	}
+
+	line, err := FormatEvent(ev)
+	if err != nil {
+		t.Fatalf("FormatEvent returned error: %v", err)
+	}
+
+	expected := "[2026-02-09T12:34:56Z] [alice] [info] Something happened"
+	if line != expected {
+		t.Fatalf("expected %q, got %q", expected, line)
+	}
+}
+
+func TestFormatEvent_WithAppAndUser(t *testing.T) {
+	ev := model.Event{
+		Timestamp: time.Date(2026, 2, 9, 12, 34, 56, 0, time.UTC),
+		Level:     model.LevelInfo,
+		Message:   "Something happened",
+		App:       "myservice",
+		User:      "alice",
+		Fields:    map[string]any{},
+	}
+
+	line, err := FormatEvent(ev)
+	if err != nil {
+		t.Fatalf("FormatEvent returned error: %v", err)
+	}
+
+	expected := "[2026-02-09T12:34:56Z] [myservice] [alice] [info] Something happened"
+	if line != expected {
+		t.Fatalf("expected %q, got %q", expected, line)
+	}
+}
+
 func TestFormatEvent_WithFieldsAndNewlines(t *testing.T) {
 	ev := model.Event{
 		Timestamp: time.Date(2026, 2, 9, 12, 34, 56, 0, time.UTC),

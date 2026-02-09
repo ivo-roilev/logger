@@ -1,10 +1,10 @@
 ## Implementation tasks
 
-- [ ] **Scaffold Go module**
+- [x] **Scaffold Go module**
   - Initialise `go.mod` for the project.
   - Add dependency on `github.com/go-chi/chi/v5`.
 
-- [ ] **Implement event model and validation**
+- [x] **Implement event model and validation**
   - Create `internal/model/event.go`.
   - Define request payload structures and JSON tags.
   - Implement timestamp parsing (RFC3339) and level normalisation.
@@ -12,14 +12,14 @@
   - Add 3-day window validation: reject timestamps more than 1 day in the past or future.
   - Include optional `user` and `app` string fields in the data model.
 
-- [ ] **Implement line formatter**
+- [x] **Implement line formatter**
   - Create `internal/format/line.go`.
   - Implement `FormatEvent` to:
     - Build the base `[timestamp] [app] [user] [level] message` string, omitting `[app]` and `[user]` segments when those fields are not present.
     - Append sorted `fields` as `key=value` pairs.
     - Apply sanitisation (newline → tab) for messages, user, app, and string values.
 
-- [ ] **Implement file sink with current-day file handle optimisation**
+- [x] **Implement file sink with current-day file handle optimisation**
   - Create `internal/sink/filesink.go`.
   - Define `Sink` interface with `WriteLine(ctx context.Context, line string, timestamp time.Time) error`.
   - Implement `FileSink`:
@@ -33,7 +33,7 @@
   - Ensure the log directory is created for `LOG_DIR`.
   - Implement mutex-guarded writes to prevent interleaved writes to the same file.
 
-- [ ] **Implement HTTP handler**
+- [x] **Implement HTTP handler**
   - Create `internal/httpapi/handlers.go`.
   - Implement handler for `POST /logs`:
     - Extract optional `app` query parameter from URL.
@@ -44,13 +44,13 @@
     - Pass the formatted line and the event's timestamp to the sink so it can route to the correct dated file.
     - Return `202` with `{ "status": "ok" }` on success, appropriate errors otherwise.
 
-- [ ] **Wire server entrypoint**
+- [x] **Wire server entrypoint**
   - Create `cmd/logger-server/main.go`.
   - Read `PORT` and `LOG_DIR` from environment with defaults.
   - Initialise `FileSink` with the log directory, formatter, and HTTP handler.
   - Start HTTP server with chi router.
 
-- [ ] **Add unit tests**
+- [x] **Add unit tests**
   - Add tests for formatter (`internal/format/line_test.go`).
   - Add tests for model validation (`internal/model/event_test.go`):
     - Test timestamp parsing and level normalisation.
@@ -71,7 +71,7 @@
     - Test that events with timestamps outside the 3-day window are rejected with `400`.
     - Test that valid events within the 3-day window reach the sink with correct timestamps.
 
-- [ ] **Add README and usage examples**
+- [x] **Add README and usage examples**
   - Create `README.md` with:
     - Setup instructions (`go run ./cmd/logger-server`).
     - Configuration options (`PORT`, `LOG_DIR`) and explanation of 3-day window validation and message-timestamp-based file organisation.

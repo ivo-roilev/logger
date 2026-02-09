@@ -24,8 +24,18 @@ func FormatEvent(e model.Event) (string, error) {
 	message := sanitizeString(e.Message)
 
 	var b strings.Builder
-	// [timestamp] [level] message
-	fmt.Fprintf(&b, "[%s] [%s] %s", timestamp, level, message)
+	// [timestamp] [app] [user] [level] message
+	fmt.Fprintf(&b, "[%s]", timestamp)
+
+	if e.App != "" {
+		fmt.Fprintf(&b, " [%s]", sanitizeString(e.App))
+	}
+
+	if e.User != "" {
+		fmt.Fprintf(&b, " [%s]", sanitizeString(e.User))
+	}
+
+	fmt.Fprintf(&b, " [%s] %s", level, message)
 
 	if len(e.Fields) == 0 {
 		return b.String(), nil

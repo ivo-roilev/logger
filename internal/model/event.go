@@ -38,6 +38,8 @@ type EventPayload struct {
 	Timestamp string         `json:"timestamp"`
 	Level     string         `json:"level"`
 	Message   string         `json:"message"`
+	User      string         `json:"user,omitempty"`
+	App       string         `json:"app,omitempty"`
 	Fields    map[string]any `json:"fields,omitempty"`
 }
 
@@ -46,6 +48,8 @@ type Event struct {
 	Timestamp time.Time
 	Level     LogLevel
 	Message   string
+	User      string
+	App       string
 	Fields    map[string]any
 }
 
@@ -62,6 +66,20 @@ func (p *EventPayload) ToEvent() (Event, error) {
 		return ev, fmt.Errorf("invalid timestamp: must be RFC3339")
 	}
 
+	// Validate 3-day window: reject timestamps more than 1 day in the past or future.
+	now := time.Now().UTC()
+	
+	// Extract just the dates for comparison (ignore time of day)
+	nowDate := now.Truncate(24 * time.Hour)
+	parsedDate := parsed.UTC().Truncate(24 * time.Hour)
+	
+	dayAgo := nowDate.AddDate(0, 0, -1)
+	dayFuture := nowDate.AddDate(0, 0, 1)
+
+	if parsedDate.Before(dayAgo) || parsedDate.After(dayFuture) {
+		return ev, fmt.Errorf("timestamp outside 3-day window: must be within ±1 day of current date")
+	}
+
 	level, err := ParseLogLevel(p.Level)
 	if err != nil {
 		return ev, err
@@ -72,6 +90,9 @@ func (p *EventPayload) ToEvent() (Event, error) {
 		return ev, fmt.Errorf("missing field: message")
 	}
 
+	user := strings.TrimSpace(p.User)
+	app := strings.TrimSpace(p.App)
+
 	fields := p.Fields
 	if fields == nil {
 		fields = make(map[string]any)
@@ -81,6 +102,8 @@ func (p *EventPayload) ToEvent() (Event, error) {
 		Timestamp: parsed,
 		Level:     level,
 		Message:   msg,
+		User:      user,
+		App:       app,
 		Fields:    fields,
 	}
 	return ev, nil

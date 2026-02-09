@@ -41,6 +41,14 @@ func (h *LoggerHandler) PostLog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// If app is not in the JSON body, try to get it from the query parameter
+	if payload.App == "" {
+		queryApp := strings.TrimSpace(r.URL.Query().Get("app"))
+		if queryApp != "" {
+			payload.App = queryApp
+		}
+	}
+
 	ev, err := payload.ToEvent()
 	if err != nil {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
@@ -53,7 +61,8 @@ func (h *LoggerHandler) PostLog(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.Sink.WriteLine(r.Context(), line); err != nil {
+	// Pass the timestamp to the sink for message-timestamp-based routing
+	if err := h.Sink.WriteLine(r.Context(), line, ev.Timestamp); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "failed to write log")
 		return
 	}

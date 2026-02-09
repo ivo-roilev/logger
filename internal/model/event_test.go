@@ -69,3 +69,68 @@ func TestToEvent_EmptyMessage(t *testing.T) {
 	}
 }
 
+func TestToEvent_3DayWindowValidation_Accept_Today(t *testing.T) {
+	// Today (2026-02-09) should be accepted
+	payload := EventPayload{
+		Timestamp: "2026-02-09T12:00:00Z",
+		Level:     "info",
+		Message:   "Hello",
+	}
+
+	if _, err := payload.ToEvent(); err != nil {
+		t.Fatalf("expected valid timestamp for today, got error: %v", err)
+	}
+}
+
+func TestToEvent_3DayWindowValidation_Accept_Yesterday(t *testing.T) {
+	// Yesterday (2026-02-08) should be accepted
+	payload := EventPayload{
+		Timestamp: "2026-02-08T12:00:00Z",
+		Level:     "info",
+		Message:   "Hello",
+	}
+
+	if _, err := payload.ToEvent(); err != nil {
+		t.Fatalf("expected valid timestamp for yesterday, got error: %v", err)
+	}
+}
+
+func TestToEvent_3DayWindowValidation_Accept_Tomorrow(t *testing.T) {
+	// Tomorrow (2026-02-10) should be accepted
+	payload := EventPayload{
+		Timestamp: "2026-02-10T12:00:00Z",
+		Level:     "info",
+		Message:   "Hello",
+	}
+
+	if _, err := payload.ToEvent(); err != nil {
+		t.Fatalf("expected valid timestamp for tomorrow, got error: %v", err)
+	}
+}
+
+func TestToEvent_3DayWindowValidation_Reject_TwoDaysAgo(t *testing.T) {
+	// Two days ago (2026-02-07) should be rejected
+	payload := EventPayload{
+		Timestamp: "2026-02-07T12:00:00Z",
+		Level:     "info",
+		Message:   "Hello",
+	}
+
+	if _, err := payload.ToEvent(); err == nil {
+		t.Fatalf("expected error for timestamp two days ago")
+	}
+}
+
+func TestToEvent_3DayWindowValidation_Reject_InTwoDays(t *testing.T) {
+	// In two days (2026-02-11) should be rejected
+	payload := EventPayload{
+		Timestamp: "2026-02-11T12:00:00Z",
+		Level:     "info",
+		Message:   "Hello",
+	}
+
+	if _, err := payload.ToEvent(); err == nil {
+		t.Fatalf("expected error for timestamp in two days")
+	}
+}
+
