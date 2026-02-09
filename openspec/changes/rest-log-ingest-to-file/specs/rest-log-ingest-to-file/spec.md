@@ -4,7 +4,7 @@
 The system SHALL expose an HTTP endpoint that accepts JSON log events over HTTP and appends them to a local log file.
 
 #### Scenario: Accepts valid log event
-- **WHEN** a client sends an HTTP `POST` request to `/logs` with a `Content-Type: application/json` header and a well-formed JSON body containing `timestamp` (RFC3339 string), `level` (one of `debug`, `info`, `warn`, `error`), `message` (non-empty string), and optional `fields` (object)
+- **WHEN** a client sends an HTTP `POST` request to `/logs` with a `Content-Type: application/json` header and a well-formed JSON body containing `timestamp` (RFC3339 string), `level` (one of `debug`, `info`, `warn`, `error`), `message` (non-empty string), optional `user` (string), optional `app` (string), and optional `fields` (object)
 - **THEN** the service SHALL respond with HTTP status `202 Accepted` and a JSON body containing `{ "status": "ok" }`, and SHALL append exactly one new line to the configured log file representing the event.
 
 #### Scenario: Rejects invalid JSON payload
@@ -14,9 +14,13 @@ The system SHALL expose an HTTP endpoint that accepts JSON log events over HTTP 
 ### Requirement: Log line formatting
 The system SHALL format each accepted log event as a single human-readable text line using a consistent bracketed format and field encoding.
 
-#### Scenario: Formats base line with timestamp, level, and message
+#### Scenario: Formats base line with timestamp, optional app/user, level, and message
 - **WHEN** a valid log event is processed
-- **THEN** the system SHALL write a line in the form `[<timestamp>] [<level>] <message>` where `<timestamp>` is the RFC3339 timestamp string, `<level>` is the normalised log level, and `<message>` is the event message with any `\n` or `\r` characters replaced by tab characters.
+- **THEN** the system SHALL write a line in the form `[<timestamp>] [<app>] [<user>] [<level>] <message>`, omitting any `[<app>]` or `[<user>]` segments whose values are not present or empty, where `<timestamp>` is the RFC3339 timestamp string, `<level>` is the normalised log level, and `<message>` is the event message with any `\n` or `\r` characters replaced by tab characters.
+
+#### Scenario: Includes app and user fields between timestamp and level
+- **WHEN** a valid log event includes optional `app` and/or `user` fields
+- **THEN** the system SHALL render these values as additional square-bracket segments immediately after the timestamp and before the level, with the `app` segment (if present) appearing before the `user` segment (for example `[2026-02-09T12:00:00Z] [checkout-service] [alice] [info] Message`), sanitising newline characters in `app` and `user` values to tabs, and SHALL omit any segment for a field that is not present or empty.
 
 #### Scenario: Appends structured fields as key=value pairs
 - **WHEN** a valid log event includes a non-empty `fields` object

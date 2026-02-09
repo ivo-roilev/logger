@@ -65,6 +65,8 @@ In `internal/model/event.go`:
     - `Timestamp` (`time.Time`)
     - `Level` (custom type, e.g. `LogLevel`)
     - `Message` (`string`)
+    - `User` (`string`, optional)
+    - `App` (`string`, optional)
     - `Fields` (`map[string]any`)
 
 - JSON binding:
@@ -72,11 +74,14 @@ In `internal/model/event.go`:
     - `timestamp` as `string`.
     - `level` as `string`.
     - `message` as `string`.
+    - `user` as `string` (optional, omitempty).
+    - `app` as `string` (optional, omitempty).
     - `fields` as `map[string]any`.
   - Provide `FromRequestPayload` / `Normalize` helper that:
     - Parses the timestamp string into `time.Time` (RFC3339).
     - Normalises `level` to a known set (`debug`, `info`, `warn`, `error`).
     - Checks that `message` is non-empty after trimming.
+    - Preserves `user` and `app` values if present.
 
 - Level type:
   - Use:
@@ -119,8 +124,18 @@ In `internal/format/line.go`:
 - `FormatEvent` logic:
   - Sanitise `Message`:
     - Replace `\n` and `\r` with `\t`.
-  - Build base string:
-    - `[<timestamp>] [<level>] <message>`
+  - Start with the timestamp segment:
+    - `[<timestamp>]`
+  - If `App` is present and non-empty:
+    - Sanitise value (newline → tab).
+    - Append: ` [<app>]`.
+  - If `User` is present and non-empty:
+    - Sanitise value (newline → tab).
+    - Append: ` [<user>]`.
+  - Append the level segment:
+    - ` [<level>]`.
+  - Append a space and the message:
+    - ` <message>`.
   - If `Fields` is non-empty:
     - Extract keys, sort lexicographically.
     - For each key:

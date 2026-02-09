@@ -9,13 +9,14 @@
   - Define request payload structures and JSON tags.
   - Implement timestamp parsing (RFC3339) and level normalisation.
   - Add validation for required fields (`timestamp`, `level`, `message`).
+  - Include optional `user` and `app` string fields in the data model.
 
 - [ ] **Implement line formatter**
   - Create `internal/format/line.go`.
   - Implement `FormatEvent` to:
-    - Build the base `[timestamp] [level] message` string.
+    - Build the base `[timestamp] [app] [user] [level] message` string, omitting `[app]` and `[user]` segments when those fields are not present.
     - Append sorted `fields` as `key=value` pairs.
-    - Apply sanitisation (newline → tab) for messages and string values.
+    - Apply sanitisation (newline → tab) for messages, user, app, and string values.
 
 - [ ] **Implement file sink**
   - Create `internal/sink/filesink.go`.

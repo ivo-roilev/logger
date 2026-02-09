@@ -29,7 +29,7 @@ We want a small, focused logging service that accepts log events over HTTP and i
 - **REST ingestion endpoint**: Provide a simple HTTP endpoint (`POST /logs`) that accepts a JSON representation of a single log event.
 - **Structured input, plain-text output**: Accept structured JSON, but store events as single-line, human-readable text entries in a log file.
 - **Deterministic line format**: Use a consistent bracketed format:
-  - `[<timestamp>] [<level>] <message>`
+  - `[<timestamp>] [<user>] [<app>] [<level>] <message>`, omitting any `[<user>]` or `[<app>]` segments when those fields are not present
   - If there are extra fields, append: ` | key=value key2=value2`
 - **Safe concurrent writes**: Ensure concurrent requests cannot interleave partial lines or corrupt the file.
 - **Configuration via environment**: Allow configuring the listen port and log file path via environment variables, with sensible defaults.
@@ -48,6 +48,8 @@ We want a small, focused logging service that accepts log events over HTTP and i
   - `timestamp` (string, RFC3339)
   - `level` (string, e.g., `debug`, `info`, `warn`, `error`)
   - `message` (string)
+  - `user` (optional string)
+  - `app` (optional string)
   - `fields` (optional object with arbitrary key/value pairs)
 - Normalise and validate incoming requests:
   - Parse the JSON body into a Go struct.
