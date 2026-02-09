@@ -31,6 +31,14 @@ The system SHALL expose an HTTP `POST /logs` endpoint that accepts JSON log even
   - Accept `fields` as an optional object with arbitrary key-value content
   - Normalise `level` to lowercase for consistent formatting
 
+#### Scenario: Accepts app value from URL query parameter
+- **WHEN** a client sends a `POST /logs` request with an optional `app` query parameter (e.g., `POST /logs?app=checkout-service`)
+- **THEN** the service SHALL accept the `app` value from the query parameter and use it in the log line if no `app` value is present in the JSON body; if both the query parameter and JSON body contain an `app` value, the JSON body value SHALL take precedence.
+
+#### Scenario: Rejects invalid app query parameter
+- **WHEN** a client sends a `POST /logs` request with an `app` query parameter that is empty or contains only whitespace
+- **THEN** the service SHALL treat the query parameter as not provided and only use the `app` value from the JSON body if present.
+
 ### Requirement: Log line formatting
 The system SHALL format each accepted log event as a single human-readable text line using a consistent bracketed format, ensuring all content is sanitised and rendered on a single line.
 

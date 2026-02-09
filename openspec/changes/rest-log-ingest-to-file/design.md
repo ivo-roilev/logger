@@ -110,8 +110,10 @@ In `internal/httpapi/handlers.go`:
 
 - Implement:
   - `func (h *LoggerHandler) PostLog(w http.ResponseWriter, r *http.Request)`
+    - Extract optional `app` query parameter from URL (e.g., `?app=checkout-service`).
     - Check method and content type.
     - Decode JSON body.
+    - If `app` is not present in the JSON body and an `app` query parameter is provided and non-empty, use the query parameter value.
     - Normalise into `model.Event`.
     - Call formatter.
     - Write formatted line via sink.
@@ -193,5 +195,8 @@ In `internal/format/line.go`:
     - Use `httptest` to:
       - Send a well-formed request and assert `202` and sink call.
       - Send invalid JSON / missing fields / invalid timestamp and assert `400`.
+      - Send a request with `app` in query parameter when JSON body does not include `app`, and verify the query parameter value is used.
+      - Send a request with `app` in both query parameter and JSON body, and verify JSON body value takes precedence.
+      - Send a request with an empty or whitespace-only `app` query parameter, and verify it is ignored.
     - Use a fake sink in tests (in-memory slice or buffer).
 

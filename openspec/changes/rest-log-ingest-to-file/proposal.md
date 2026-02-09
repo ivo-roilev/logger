@@ -26,7 +26,8 @@ We want a small, focused logging service that accepts log events over HTTP and i
 
 ## Goals
 
-- **REST ingestion endpoint**: Provide a simple HTTP endpoint (`POST /logs`) that accepts a JSON representation of a single log event.
+- **REST ingestion endpoint**: Provide a simple HTTP endpoint (`POST /logs`) that accepts a JSON representation of a single log event, with support for optional URL query parameters.
+- **Flexible app identification**: Allow the `app` (application name) to be specified either in the JSON payload or as a query parameter (`?app=<app-name>`), with JSON payload taking precedence when both are provided.
 - **Structured input, plain-text output**: Accept structured JSON, but store events as single-line, human-readable text entries in a log file.
 - **Deterministic line format**: Use a consistent bracketed format:
   - `[<timestamp>] [<user>] [<app>] [<level>] <message>`, omitting any `[<user>]` or `[<app>]` segments when those fields are not present
