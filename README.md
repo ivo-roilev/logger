@@ -157,21 +157,33 @@ curl -X POST http://localhost:9090/logs \
 Log lines are written in the following format:
 
 ```
-[timestamp] [app] [user] [level] message | field1=value1 field2=value2 ...
+[timestamp] [LEVEL] [app] [user] message | field1=value1 field2=value2 ...
 ```
+
+Where:
+- **timestamp**: RFC3339 formatted UTC timestamp
+- **LEVEL**: Uppercase level abbreviation, padded to 7 characters total (including brackets):
+  - `[DEBUG]` (7 chars)
+  - `[INFO] ` (7 chars, with trailing space)
+  - `[WARN] ` (7 chars, with trailing space)
+  - `[ERROR]` (7 chars)
+- **app**: Application name (optional)
+- **user**: User identifier (optional)  
+- **message**: Log message
+- **fields**: Additional key-value pairs (optional, sorted lexicographically)
 
 ### Example Log Files
 
 **File: logs/2026-02-09.log**
 ```
-[2026-02-09T14:30:00Z] [myservice] [alice] [info] User login successful | user_id=12345 ip_address=203.0.113.42
-[2026-02-09T14:31:15Z] [api-service] [system] [error] Database connection failed | error_code=TIMEOUT host=db.example.com port=5432 retry_count=3
-[2026-02-09T14:32:45Z] [web-frontend] [info] Page rendered | page=dashboard render_time_ms=245
+[2026-02-09T14:30:00Z] [INFO]  [myservice] [alice] User login successful | user_id=12345 ip_address=203.0.113.42
+[2026-02-09T14:31:15Z] [ERROR] [api-service] [system] Database connection failed | error_code=TIMEOUT host=db.example.com port=5432 retry_count=3
+[2026-02-09T14:32:45Z] [INFO]  [web-frontend] Page rendered | page=dashboard render_time_ms=245
 ```
 
 **File: logs/2026-02-08.log**
 ```
-[2026-02-08T23:45:30Z] [myservice] [warn] Deprecated endpoint accessed | user_id=67890
+[2026-02-08T23:45:30Z] [WARN]  [myservice] Deprecated endpoint accessed | user_id=67890
 ```
 
 ## Timestamp-Based File Organization and 3-Day Window

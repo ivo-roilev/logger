@@ -1,6 +1,7 @@
 package format
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -20,7 +21,7 @@ func TestFormatEvent_NoFields(t *testing.T) {
 		t.Fatalf("FormatEvent returned error: %v", err)
 	}
 
-	expected := "[2026-02-09T12:34:56Z] [INFO] User logged in"
+	expected := "[2026-02-09T12:34:56Z] [INFO]  User logged in"
 	if line != expected {
 		t.Fatalf("expected %q, got %q", expected, line)
 	}
@@ -40,7 +41,7 @@ func TestFormatEvent_WithApp(t *testing.T) {
 		t.Fatalf("FormatEvent returned error: %v", err)
 	}
 
-	expected := "[2026-02-09T12:34:56Z] [INFO] [myservice] Something happened"
+	expected := "[2026-02-09T12:34:56Z] [INFO]  [myservice] Something happened"
 	if line != expected {
 		t.Fatalf("expected %q, got %q", expected, line)
 	}
@@ -60,7 +61,7 @@ func TestFormatEvent_WithUser(t *testing.T) {
 		t.Fatalf("FormatEvent returned error: %v", err)
 	}
 
-	expected := "[2026-02-09T12:34:56Z] [INFO] [alice] Something happened"
+	expected := "[2026-02-09T12:34:56Z] [INFO]  [alice] Something happened"
 	if line != expected {
 		t.Fatalf("expected %q, got %q", expected, line)
 	}
@@ -81,7 +82,7 @@ func TestFormatEvent_WithAppAndUser(t *testing.T) {
 		t.Fatalf("FormatEvent returned error: %v", err)
 	}
 
-	expected := "[2026-02-09T12:34:56Z] [INFO] [myservice] [alice] Something happened"
+	expected := "[2026-02-09T12:34:56Z] [INFO]  [myservice] [alice] Something happened"
 	if line != expected {
 		t.Fatalf("expected %q, got %q", expected, line)
 	}
@@ -111,15 +112,15 @@ func TestFormatEvent_WithFieldsAndNewlines(t *testing.T) {
 }
 
 func TestFormatEvent_LevelPaddingAlignment(t *testing.T) {
-	// Verify all levels are properly padded to 7 characters (including brackets)
+	// Verify all levels are properly formatted to 7 characters (including brackets and padding)
 	tests := []struct {
 		level    model.LogLevel
-		expected string
+		abbr     string    // The formatted level (7 chars)
 	}{
-		{model.LevelDebug, "[2026-02-09T12:34:56Z] [DEBUG]"},
-		{model.LevelInfo, "[2026-02-09T12:34:56Z] [INFO] "},
-		{model.LevelWarn, "[2026-02-09T12:34:56Z] [WARN] "},
-		{model.LevelError, "[2026-02-09T12:34:56Z] [ERROR]"},
+		{model.LevelDebug, "[DEBUG]"},  // 7 chars
+		{model.LevelInfo, "[INFO] "},   // 6 + 1 space = 7 chars
+		{model.LevelWarn, "[WARN] "},   // 6 + 1 space = 7 chars
+		{model.LevelError, "[ERROR]"},  // 7 chars
 	}
 
 	for _, tt := range tests {
@@ -135,13 +136,11 @@ func TestFormatEvent_LevelPaddingAlignment(t *testing.T) {
 			t.Fatalf("FormatEvent returned error: %v", err)
 		}
 
-		// Extract just the timestamp and level part (first 38 chars for the expected prefix)
-		if len(line) < 38 {
-			t.Fatalf("line too short: %q", line)
-		}
-		prefix := line[:38]
-		if prefix != tt.expected {
-			t.Fatalf("level %s: expected %q, got %q", tt.level, tt.expected, prefix)
+		// The format is: [timestamp] [LEVEL (padded to 7 chars)] message
+		// So the expected prefix is [2026-02-09T12:34:56Z] + space + level (7 chars) + space
+		expectedPrefix := "[2026-02-09T12:34:56Z] " + tt.abbr + " "
+		if !strings.HasPrefix(line, expectedPrefix) {
+			t.Fatalf("level %s: expected prefix %q, got %q", tt.level, expectedPrefix, line)
 		}
 	}
 }

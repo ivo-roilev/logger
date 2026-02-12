@@ -13,5 +13,10 @@ All notable changes to this project are documented in this file.
   - HTTP API: `POST /logs` accepting JSON (timestamp, level, message, optional user/app/fields); `app` may be provided via `?app=` (body takes precedence)
   - Mutex-guarded writes and file `Sync` for durability
 
-### Tests
-- Unit and integration tests added/updated for model, format, sink, and handlers. All tests pass on archive.
+### Changed
+- **BREAKING**: Updated log output format — 2026-02-12
+  - Field order changed from `[timestamp] [app] [user] [level] message` to `[timestamp] [level] [app] [user] message`
+  - Log levels now uppercase with abbreviations: `[DEBUG]`, `[INFO] `, `[WARN] `, `[ERROR]` (padded to 7 characters total)
+  - Previously levels were lowercase: `[debug]`, `[info]`, `[warn]`, `[error]`
+  - This improves log readability by placing severity immediately after the timestamp
+
