@@ -71,7 +71,7 @@ We want a small, focused logging service that accepts log events over HTTP and i
   - Serialises writes (e.g., using a mutex) so each event is written as an atomic line with a trailing newline.
   - Minimises file handle overhead by keeping only today's file open continuously.
 - Expose configuration through environment variables:
-  - `PORT` (default `8080`)
+  - `PORT` (default `9090`)
   - `LOG_DIR` (default `./logs`) - directory where daily log files will be stored
 
 ## Success criteria

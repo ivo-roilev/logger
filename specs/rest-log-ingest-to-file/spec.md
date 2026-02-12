@@ -77,7 +77,7 @@ The system SHALL allow basic configuration of the listen port and log file direc
 
 #### Scenario: Uses default configuration when env vars are unset
 - **WHEN** the service starts and neither `PORT` nor `LOG_DIR` environment variables are set
-- **THEN** the service SHALL listen on TCP port `8080` (using address `:8080`) and SHALL write log lines to the directory `./logs`, creating it if it does not exist, with daily log files named in the format `YYYY-MM-DD.log` (e.g., `./logs/2026-02-09.log` for February 9, 2026).
+- **THEN** the service SHALL listen on TCP port `9090` (using address `:9090`) and SHALL write log lines to the directory `./logs`, creating it if it does not exist, with daily log files named in the format `YYYY-MM-DD.log` (e.g., `./logs/2026-02-09.log` for February 9, 2026).
 
 #### Scenario: Uses environment overrides for configuration
 - **WHEN** the service starts with `PORT` set to a valid port number string (e.g., `"9090"`) and/or `LOG_DIR` set to a valid filesystem path

@@ -17,15 +17,32 @@ func sanitizeString(s string) string {
 	return s
 }
 
+// levelAbbreviation converts a LogLevel to its uppercase abbreviated form with padding to 7 chars total.
+// debug→[DEBUG], info→[INFO] , warn→[WARN] , error→[ERROR]
+func levelAbbreviation(level model.LogLevel) string {
+	switch level {
+	case model.LevelDebug:
+		return "[DEBUG]"
+	case model.LevelInfo:
+		return "[INFO] "
+	case model.LevelWarn:
+		return "[WARN] "
+	case model.LevelError:
+		return "[ERROR]"
+	default:
+		return "[" + strings.ToUpper(string(level)) + "]"
+	}
+}
+
 // FormatEvent renders an Event into a single log line according to the spec.
 func FormatEvent(e model.Event) (string, error) {
 	timestamp := e.Timestamp.Format(time.RFC3339)
-	level := strings.ToLower(string(e.Level))
+	level := levelAbbreviation(e.Level)
 	message := sanitizeString(e.Message)
 
 	var b strings.Builder
-	// [timestamp] [app] [user] [level] message
-	fmt.Fprintf(&b, "[%s]", timestamp)
+	// [timestamp] [level] [app] [user] message
+	fmt.Fprintf(&b, "[%s] %s", timestamp, level)
 
 	if e.App != "" {
 		fmt.Fprintf(&b, " [%s]", sanitizeString(e.App))
@@ -35,7 +52,7 @@ func FormatEvent(e model.Event) (string, error) {
 		fmt.Fprintf(&b, " [%s]", sanitizeString(e.User))
 	}
 
-	fmt.Fprintf(&b, " [%s] %s", level, message)
+	fmt.Fprintf(&b, " %s", message)
 
 	if len(e.Fields) == 0 {
 		return b.String(), nil

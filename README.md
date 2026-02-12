@@ -28,7 +28,7 @@ go build ./cmd/logger-server
 ### Run
 
 ```bash
-# Default port (8080) and log directory (./logs)
+# Default port (9090) and log directory (./logs)
 go run ./cmd/logger-server
 
 # Custom configuration
@@ -39,7 +39,7 @@ PORT=3000 LOG_DIR=/var/log/app ./logger-server
 
 ### Environment Variables
 
-- `PORT` (default: `8080`)
+- `PORT` (default: `9090`)
   - HTTP server port. If provided without a colon, will be prefixed with `:`.
   - Examples: `PORT=3000`, `PORT=:9000`.
 
@@ -112,7 +112,7 @@ Returns 400 for:
 
 #### With app in JSON body:
 ```bash
-curl -X POST http://localhost:8080/logs \
+curl -X POST http://localhost:9090/logs \
   -H "Content-Type: application/json" \
   -d '{
     "timestamp": "2026-02-09T14:30:00Z",
@@ -124,7 +124,7 @@ curl -X POST http://localhost:8080/logs \
 
 #### With app in query parameter:
 ```bash
-curl -X POST "http://localhost:8080/logs?app=myservice" \
+curl -X POST "http://localhost:9090/logs?app=myservice" \
   -H "Content-Type: application/json" \
   -d '{
     "timestamp": "2026-02-09T14:30:00Z",
@@ -135,7 +135,7 @@ curl -X POST "http://localhost:8080/logs?app=myservice" \
 
 #### With additional fields:
 ```bash
-curl -X POST http://localhost:8080/logs \
+curl -X POST http://localhost:9090/logs \
   -H "Content-Type: application/json" \
   -d '{
     "timestamp": "2026-02-09T14:30:00Z",
@@ -281,12 +281,12 @@ The handler (`internal/httpapi/handlers.go`) provides:
 go run ./cmd/logger-server
 ```
 
-This will start the server on `http://localhost:8080` and write logs to `./logs/app.log`.
+This will start the server on `http://localhost:9090` and write logs to `./logs/app.log`.
 
 ### Example request
 
 ```bash
-curl -X POST http://localhost:8080/logs \
+curl -X POST http://localhost:9090/logs \
   -H "Content-Type: application/json" \
   -d '{
     "timestamp": "2026-02-09T12:34:56Z",
