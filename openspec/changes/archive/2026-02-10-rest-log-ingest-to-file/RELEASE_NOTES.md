@@ -22,7 +22,7 @@
 - Unit tests added/updated for model, formatter, sink, and handlers. Run `go test ./...` — all tests pass in the repository at the time of archiving.
 
 **Configuration & run:**
-- `PORT` environment variable (default `:8080` when unset or `8080` numeric string normalized).
+- `PORT` environment variable (default `:9090` when unset or `9090` numeric string normalized).
 - `LOG_DIR` environment variable (default `./logs`).
 - Build & run:
 ```

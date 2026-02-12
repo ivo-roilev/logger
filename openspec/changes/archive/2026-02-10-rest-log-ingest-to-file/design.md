@@ -208,7 +208,7 @@ In `internal/format/line.go`:
 - Environment variables:
   - `PORT`:
     - Read as string.
-    - If empty, default to `":8080"`.
+    - If empty, default to `":9090"`.
     - If present and numeric, normalise to `":" + value`.
   - `LOG_DIR`:
     - Default: `./logs`.

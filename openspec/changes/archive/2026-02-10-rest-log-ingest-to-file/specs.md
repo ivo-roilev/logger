@@ -185,8 +185,8 @@ The log line must be:
 
 - **Environment variables**:
   - `PORT`
-    - Default: `8080`.
-    - Type: string representing a TCP port (e.g., `":8080"` or `8080` depending on implementation; the service will document the exact format).
+    - Default: `9090`.
+    - Type: string representing a TCP port (e.g., `":9090"` or `9090` depending on implementation; the service will document the exact format).
   - `LOG_FILE_PATH`
     - Default: `./logs/app.log`.
     - If the parent directory does not exist, the service must attempt to create it on startup.

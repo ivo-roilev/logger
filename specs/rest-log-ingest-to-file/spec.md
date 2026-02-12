@@ -47,15 +47,22 @@ The system SHALL expose an HTTP `POST /logs` endpoint that accepts JSON log even
 ### Requirement: Log line formatting
 The system SHALL format each accepted log event as a single human-readable text line using a consistent bracketed format, ensuring all content is sanitised and rendered on a single line.
 
-#### Scenario: Formats base line with timestamp, optional app/user, level, and message
+#### Scenario: Formats base line with timestamp, level, optional app/user, and message
 - **WHEN** a valid log event is processed
 - **THEN** the system SHALL write a line with segments in the following order:
   1. Timestamp segment: `[<timestamp>]` (RFC3339 format)
-  2. App segment (if `app` is present and non-empty): ` [<app>]`
-  3. User segment (if `user` is present and non-empty): ` [<user>]`
-  4. Level segment: ` [<level>]` (normalised to lowercase)
+  2. Level segment: ` [<LEVEL>]` (uppercase 4-5 character abbreviation with padding to 7 chars total)
+  3. App segment (if `app` is present and non-empty): ` [<app>]`
+  4. User segment (if `user` is present and non-empty): ` [<user>]`
   5. Message: space followed by `<message>`
   6. Optional fields segment (if `fields` is non-empty): ` | <key-value pairs>`
+
+#### Scenario: Level abbreviation and padding format
+- **WHEN** formatting a log event level
+- **THEN** the system SHALL:
+  - Convert the level to uppercase: `DEBUG`, `INFO`, `WARN`, `ERROR`
+  - Wrap it in square brackets: `[DEBUG]`, `[INFO]`, `[WARN]`, `[ERROR]`
+  - Pad the output to exactly 7 characters total (including brackets) by adding a space after the closing bracket for `INFO` and `WARN`: `[DEBUG]`, `[INFO] `, `[WARN] `, `[ERROR]`
 
 #### Scenario: Sanitises newlines and special characters
 - **WHEN** formatting the log line
@@ -77,7 +84,7 @@ The system SHALL allow basic configuration of the listen port and log file direc
 
 #### Scenario: Uses default configuration when env vars are unset
 - **WHEN** the service starts and neither `PORT` nor `LOG_DIR` environment variables are set
-- **THEN** the service SHALL listen on TCP port `8080` (using address `:8080`) and SHALL write log lines to the directory `./logs`, creating it if it does not exist, with daily log files named in the format `YYYY-MM-DD.log` (e.g., `./logs/2026-02-09.log` for February 9, 2026).
+- **THEN** the service SHALL listen on TCP port `9090` (using address `:9090`) and SHALL write log lines to the directory `./logs`, creating it if it does not exist, with daily log files named in the format `YYYY-MM-DD.log` (e.g., `./logs/2026-02-09.log` for February 9, 2026).
 
 #### Scenario: Uses environment overrides for configuration
 - **WHEN** the service starts with `PORT` set to a valid port number string (e.g., `"9090"`) and/or `LOG_DIR` set to a valid filesystem path

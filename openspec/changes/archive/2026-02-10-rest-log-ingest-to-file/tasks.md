@@ -79,7 +79,7 @@
     - Note that only timestamps within current ± 1 day are accepted.
     - Description of current-day file handle optimisation and automatic date change handling.
     - Example `curl` commands:
-      - With `app` in JSON body: `curl -X POST http://localhost:8080/logs -H "Content-Type: application/json" -d '{"timestamp":"2026-02-09T12:00:00Z","level":"info","message":"Hello","app":"myapp"}'`
-      - With `app` in query parameter: `curl -X POST "http://localhost:8080/logs?app=myapp" -H "Content-Type: application/json" -d '{"timestamp":"2026-02-09T12:00:00Z","level":"info","message":"Hello"}'`
+      - With `app` in JSON body: `curl -X POST http://localhost:9090/logs -H "Content-Type: application/json" -d '{"timestamp":"2026-02-09T12:00:00Z","level":"info","message":"Hello","app":"myapp"}'`
+      - With `app` in query parameter: `curl -X POST "http://localhost:9090/logs?app=myapp" -H "Content-Type: application/json" -d '{"timestamp":"2026-02-09T12:00:00Z","level":"info","message":"Hello"}'`
     - Sample log file output showing events in dated log files (`./logs/2026-02-09.log`, `./logs/2026-02-10.log`, etc.).
 
